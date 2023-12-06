@@ -16,7 +16,7 @@ load_dotenv()
 def format_arguments(args, function_sig_types):
     formatted_args = []
     for i in range(len(args)):
-        if "int" in function_sig_types:
+        if function_sig_types[i].find("int") > -1:
             formatted_args.append(int(args[i]))
         else:
             formatted_args.append(args[i])
@@ -40,19 +40,23 @@ if __name__ == "__main__":
     # function_sig: str = str(sys.argv[3])
     # args: list = list(sys.argv[4:])
     contract = args.contract
+    logging.info(f"contract: {contract}")
     value = args.value
+    logging.info(f"value: {value}")
     function_sig = args.function_sig
+    logging.info(f"function_sig: {function_sig}")
     function_arguments = args.args
+    logging.info(f"function_arguments: {function_arguments}")
     sig: bytes = keccak(text=function_sig)
-    function_sig_types: str = function_sig[function_sig.find("(") + 1: function_sig.find(")")]
-    format_args: list = list(format_arguments(function_arguments, function_sig_types))
-    # for i in range(0,len(args)):
-    #     if function_sig_types.find("int") > -1:
-    #         format_args.append(int(args[i]))
-    #     else:
-    #         format_args.append(args[i])            
-    params: bytes = encode(function_sig_types.split(","), format_args);
+    function_sig_types_str: str = str(function_sig[function_sig.find("(") + 1: function_sig.find(")")])
+    logging.info(f"function_sig_types_str: {function_sig_types_str}")
+    function_sig_types = function_sig_types_str.split(",")
+    logging.info(f"function_sig_types: {function_sig_types}")
+    format_args = format_arguments(function_arguments, function_sig_types)
+    logging.info(f"format_args: {format_args}")        
+    params: bytes = encode(function_sig_types, format_args);
     calldata: bytes = sig[0:4] + params
+    logging.info(f"calldata: {calldata}")
     # get recommended fees
     block = w3.eth.get_block('latest')
     logging.info(f"block: {block.number}")
